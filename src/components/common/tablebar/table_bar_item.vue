@@ -32,7 +32,7 @@
     font-size: 14px;
   }
 
-  img {
+  .bar_img {
     width: 24px;
     height: 24px;
     margin-top: 3px;
