@@ -1,17 +1,19 @@
 <template>
-    <SwiperSlide>
-       <slot></slot>
-     </SwiperSlide>
+  <SwiperSlide>
+    <slot></slot>
+  </SwiperSlide>
 </template>
 
 <script>
-  import {SwiperSlide} from "vue-awesome-swiper"
-	export default {
-		name: "Slide",
-    components:{
+  import {
+    SwiperSlide
+  } from "vue-awesome-swiper"
+  export default {
+    name: "Slide",
+    components: {
       SwiperSlide
     }
-	}
+  }
 </script>
 
 <style scoped>
@@ -19,6 +21,4 @@
     width: 100%;
     flex-shrink: 0;
   }
-
-
 </style>
