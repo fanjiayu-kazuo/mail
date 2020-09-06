@@ -19,7 +19,6 @@
     data() {
       return {
         swiperOption: {
-          loop: true,
           pagination: '.swiper-pagination',
           paginationClickable: true,
           spaceBetween: 30,
