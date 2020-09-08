@@ -1,5 +1,5 @@
 <template>
-  <TableBar>
+  <TableBar class="mainbar">
     <TableBarItem path='/home'>
       <img slot='bar_img' src="~assets/img/shouye.png" class="bar_img" />
       <div slot="bar_txt">首页</div>
@@ -31,4 +31,7 @@
 </script>
 
 <style>
+  .mainbar{
+    z-index: 9;
+  }
 </style>

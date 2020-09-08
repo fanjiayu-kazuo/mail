@@ -10,7 +10,7 @@
   }
 </script>
 
-<style>
+<style >
   #tablebar{
     display: flex;
     background-color: #DADADA;

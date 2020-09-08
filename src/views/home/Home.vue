@@ -1,128 +1,31 @@
 <template>
   <div id="home">
-    <NavBar class='home-nav'>
+    <nav-bar class='home-nav'>
       <div slot="center">首页</div>
-    </NavBar>
-    <HomeSwiper :banners='banners'></HomeSwiper>
-    <HomeRecommend :recommends='recommends'></HomeRecommend>
-    <HomeFeatuer></HomeFeatuer>
-    <TableCountrol :titles='["流行","新款","精选"]' class='tab_control'></TableCountrol>
-
-    <ul>
-      <li>列表1</li>
-      <li>列表2</li>
-      <li>列表3</li>
-      <li>列表4</li>
-      <li>列表5</li>
-      <li>列表6</li>
-      <li>列表7</li>
-      <li>列表8</li>
-      <li>列表9</li>
-      <li>列表10</li>
-      <li>列表11</li>
-      <li>列表12</li>
-      <li>列表13</li>
-      <li>列表14</li>
-      <li>列表15</li>
-      <li>列表16</li>
-      <li>列表17</li>
-      <li>列表18</li>
-      <li>列表19</li>
-      <li>列表20</li>
-      <li>列表21</li>
-      <li>列表22</li>
-      <li>列表23</li>
-      <li>列表24</li>
-      <li>列表25</li>
-      <li>列表26</li>
-      <li>列表27</li>
-      <li>列表28</li>
-      <li>列表29</li>
-      <li>列表30</li>
-      <li>列表31</li>
-      <li>列表32</li>
-      <li>列表33</li>
-      <li>列表34</li>
-      <li>列表35</li>
-      <li>列表36</li>
-      <li>列表37</li>
-      <li>列表38</li>
-      <li>列表39</li>
-      <li>列表40</li>
-      <li>列表41</li>
-      <li>列表42</li>
-      <li>列表43</li>
-      <li>列表44</li>
-      <li>列表45</li>
-      <li>列表46</li>
-      <li>列表47</li>
-      <li>列表48</li>
-      <li>列表49</li>
-      <li>列表50</li>
-      <li>列表51</li>
-      <li>列表52</li>
-      <li>列表53</li>
-      <li>列表54</li>
-      <li>列表55</li>
-      <li>列表56</li>
-      <li>列表57</li>
-      <li>列表58</li>
-      <li>列表59</li>
-      <li>列表60</li>
-      <li>列表61</li>
-      <li>列表62</li>
-      <li>列表63</li>
-      <li>列表64</li>
-      <li>列表65</li>
-      <li>列表66</li>
-      <li>列表67</li>
-      <li>列表68</li>
-      <li>列表69</li>
-      <li>列表70</li>
-      <li>列表71</li>
-      <li>列表72</li>
-      <li>列表73</li>
-      <li>列表74</li>
-      <li>列表75</li>
-      <li>列表76</li>
-      <li>列表77</li>
-      <li>列表78</li>
-      <li>列表79</li>
-      <li>列表80</li>
-      <li>列表81</li>
-      <li>列表82</li>
-      <li>列表83</li>
-      <li>列表84</li>
-      <li>列表85</li>
-      <li>列表86</li>
-      <li>列表87</li>
-      <li>列表88</li>
-      <li>列表89</li>
-      <li>列表90</li>
-      <li>列表91</li>
-      <li>列表92</li>
-      <li>列表93</li>
-      <li>列表94</li>
-      <li>列表95</li>
-      <li>列表96</li>
-      <li>列表97</li>
-      <li>列表98</li>
-      <li>列表99</li>
-      <li>列表100</li>
-    </ul>
+    </nav-bar>
+    <Scroll class="warpper" ref='scroll' :pullUpLoad='true' :probe-type="3" @ScorllPosition='ScorllPosition' @pullingUp='loadMore'>
+      <home-swiper :banners='banners' />
+      <home-recommend :recommends='recommends' />
+      <home-featuer />
+      <table-countrol :titles='["流行","新款","精选"]' class='tab_control' @tabClick="tabClick" />
+      <goods-list :goods='showTypeGoods'></goods-list>
+    </Scroll>
+    <back-top @click.native='backClick' v-show="showbackbotton" />
   </div>
 </template>
 
 <script>
-  import NavBar from 'components/common/navbar/NavBar.vue'
-  import HomeSwiper from './childComps/HomeSwiper.vue'
-  import HomeRecommend from './childComps/HomeRecommend.vue'
+  import NavBar from 'components/common/navbar/NavBar.vue'   //导航组件
+  import HomeSwiper from './childComps/HomeSwiper.vue'       //首页跑马灯
+  import HomeRecommend from './childComps/HomeRecommend.vue' 
   import HomeFeatuer from './childComps/HomeFeatuer.vue'
-
+  import GoodsList from "components/content/goods/GoodsList.vue"
+  import Scroll from 'components/common/betterScroll/scroll.vue'
   import TableCountrol from 'components/content/tabControl/tabControl.vue'
-
+  import BackTop from 'components/content/backTop/BackTop.vue'
   import {
-    getHomeMultidata
+    getHomeMultidata,
+    getHomeGoods
   } from '../../network/Home.js'
 
   export default {
@@ -130,6 +33,24 @@
       return {
         banners: [],
         recommends: [],
+        /*商品列表*/
+        goods: {
+          'pop': {
+            page: 0,
+            list: []
+          },
+          'new': {
+            page: 0,
+            list: []
+          },
+          'sell': {
+            page: 0,
+            list: []
+          }
+        },
+        courrentType: 'pop',
+        scroll: null,
+        showbackbotton: false
       }
     },
     components: {
@@ -137,13 +58,104 @@
       HomeSwiper,
       HomeRecommend,
       HomeFeatuer,
-      TableCountrol
+      TableCountrol,
+      GoodsList,
+      Scroll,
+      BackTop,
+
     },
     created() {
-      getHomeMultidata().then(res => {
-        this.banners = res.data.banner.list;
-        this.recommends = res.data.recommend.list;
-      })
+      this.getHomeMultidata();
+      this.getHomeGoods('pop');
+      this.getHomeGoods('new');
+      this.getHomeGoods('sell');
+      this.ListenImgUpLoad();
+    },
+    mounted() {
+
+    },
+    computed: {
+      /*
+      *返回当前选择的列表数据
+      **/
+      showTypeGoods() {
+        return this.goods[this.courrentType].list;
+      }
+    },
+    methods: {
+      /*事件监听 */
+      tabClick(index) {
+        switch (index) {
+          case 0:
+            this.courrentType = 'pop';
+            break;
+          case 1:
+            this.courrentType = 'new';
+            break;
+          case 2:
+            this.courrentType = 'sell'
+            break;
+        }
+      },
+      ListenImgUpLoad(){
+        this.$bus.$on('imgUpLoad', () => {
+          this.$refs.scroll && this.$refs.scroll.scroll.refresh()
+        })
+      },
+      /*
+       *返回到最上层
+       */
+      backClick() {
+        this.$refs.scroll && this.$refs.scroll.scroll.scrollTo(0, 0, 1000);
+      },
+      /*
+       *position 当前滚动条的滚动坐标
+       * 设置当前的回到首页的图标是否显示
+       * */
+      ScorllPosition(position) {
+        this.showbackbotton = -position.y > 500;
+
+      },
+      /*
+       *下拉加载更多
+       */
+      loadMore() {
+        console.log('more');
+        this.getHomeGoods(this.courrentType);
+        //console.log(this.courrentType);
+        this.$refs.scroll.scroll.finishPullUp();
+
+
+      },
+      /*网络请求*/
+      /*
+       *获取跑马灯的图片和推荐的4个图标
+       */
+      getHomeMultidata() {
+        getHomeMultidata().then(res => {
+          if (res && res.data && res.data.banner && res.data.recommend) {
+            this.banners = res.data.banner.list;
+            this.recommends = res.data.recommend.list;
+          }
+        })
+      },
+      /*
+       * 获取商品列表  每页30条数据
+       */
+      getHomeGoods(type) {
+        const page = this.goods[type].page + 1;
+        getHomeGoods(type, page).then(res => {
+
+          this.goods[type].list.push(...res.data.list);
+          this.goods[type].page++;
+
+        }).catch(err => {
+          console.log(err);
+        })
+      }
+    },
+    mounted() {
+      this.$nextTick(this.ListtenScroll)
     }
   }
 </script>
@@ -151,6 +163,8 @@
 <style scoped>
   #home {
     padding-top: 44px;
+    position: relative;
+    height: 100vh;
   }
 
   .home-nav {
@@ -162,9 +176,19 @@
     right: 0;
     z-index: 9;
   }
-  .tab_control{
-    position: sticky;
+
+  .tab_control {
+    /* position: sticky; */
     top: 44px;
     background-color: #FFFFFF;
+    z-index: 9;
+  }
+
+  .warpper {
+    position: absolute;
+    top: 44px;
+    bottom: 49px;
+    left: 0;
+    right: 0;
   }
 </style>

@@ -25,6 +25,7 @@
     methods: {
       changeIndex(index) {
         this.countIndex = index;
+        this.$emit("tabClick", index);
       }
     }
   }

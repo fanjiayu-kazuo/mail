@@ -18,7 +18,7 @@
   }
 </script>
 
-<style>
+<style >
   .nav-bar {
     display: flex;
     line-height: 44px;
