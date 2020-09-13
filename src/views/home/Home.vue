@@ -4,20 +4,22 @@
       <div slot="center">首页</div>
     </nav-bar>
     <Scroll class="warpper" ref='scroll' :pullUpLoad='true' :probe-type="3" @ScorllPosition='ScorllPosition' @pullingUp='loadMore'>
-      <home-swiper :banners='banners' />
+      <home-swiper :banners='banners' @SwiperImgLoad='SwiperImgLoad' />
       <home-recommend :recommends='recommends' />
       <home-featuer />
-      <table-countrol :titles='["流行","新款","精选"]' class='tab_control' @tabClick="tabClick" />
+      <table-countrol :titles='["流行","新款","精选"]' @tabClick="tabClick" ref='tabCountrolfirst' />
       <goods-list :goods='showTypeGoods'></goods-list>
     </Scroll>
+    <table-countrol :titles='["流行","新款","精选"]' @tabClick="tabClick" class="Imbibition" ref='tabCountrolSecond' v-show="showContrue" />
+
     <back-top @click.native='backClick' v-show="showbackbotton" />
   </div>
 </template>
 
 <script>
-  import NavBar from 'components/common/navbar/NavBar.vue'   //导航组件
-  import HomeSwiper from './childComps/HomeSwiper.vue'       //首页跑马灯
-  import HomeRecommend from './childComps/HomeRecommend.vue' 
+  import NavBar from 'components/common/navbar/NavBar.vue' //导航组件
+  import HomeSwiper from './childComps/HomeSwiper.vue' //首页跑马灯
+  import HomeRecommend from './childComps/HomeRecommend.vue'
   import HomeFeatuer from './childComps/HomeFeatuer.vue'
   import GoodsList from "components/content/goods/GoodsList.vue"
   import Scroll from 'components/common/betterScroll/scroll.vue'
@@ -50,7 +52,11 @@
         },
         courrentType: 'pop',
         scroll: null,
-        showbackbotton: false
+        showbackbotton: false,
+        handler: null,
+        tabOffsetTop: 0,
+        showContrue: false,
+        save_y: 0
       }
     },
     components: {
@@ -69,15 +75,23 @@
       this.getHomeGoods('pop');
       this.getHomeGoods('new');
       this.getHomeGoods('sell');
-      this.ListenImgUpLoad();
+      //this.ListenImgUpLoad();
+    },
+    activated() {
+      this.$refs.scroll.scroll && this.$refs.scroll.scroll.scrollTo(0, this.save_y, 0);
+      this.$refs.scroll.scroll && this.$refs.scroll.scroll.refresh();
+    },
+    deactivated() {
+      //this.$refs.scroll
     },
     mounted() {
-
+      this.ListenImgUpLoad();
+      // this.ListenImgUpLoad()
     },
     computed: {
       /*
-      *返回当前选择的列表数据
-      **/
+       *返回当前选择的列表数据
+       **/
       showTypeGoods() {
         return this.goods[this.courrentType].list;
       }
@@ -96,11 +110,29 @@
             this.courrentType = 'sell'
             break;
         }
+        /*
+         *改变两个的index
+         */
+        this.$refs.tabCountrolfirst.countIndex = index;
+        this.$refs.tabCountrolSecond.countIndex = index;
+
       },
-      ListenImgUpLoad(){
+      /*
+       * 监听商品的list加载并且设置防抖
+       **/
+      ListenImgUpLoad() {
         this.$bus.$on('imgUpLoad', () => {
-          this.$refs.scroll && this.$refs.scroll.scroll.refresh()
+          if (this.handler) {
+            clearTimeout(this.handler);
+          }
+          this.handler = setTimeout(() => {
+            this.$refs.scroll && this.$refs.scroll.scroll.refresh();
+          }, 200)
         })
+      },
+      SwiperImgLoad() {
+        this.tabOffsetTop = this.$refs.tabCountrolfirst.$el.offsetTop;
+        // console.log( this.$refs.tabCountrol.$el.offsetTop);
       },
       /*
        *返回到最上层
@@ -113,7 +145,10 @@
        * 设置当前的回到首页的图标是否显示
        * */
       ScorllPosition(position) {
-        this.showbackbotton = -position.y > 500;
+        this.showbackbotton = (-position.y) > 500;
+        // console.log(-position.y +'   '+ this.tabOffsetTop);
+        this.showContrue = (-position.y) > this.tabOffsetTop;
+        this.save_y = position.y
 
       },
       /*
@@ -124,8 +159,22 @@
         this.getHomeGoods(this.courrentType);
         //console.log(this.courrentType);
         this.$refs.scroll.scroll.finishPullUp();
-
-
+      },
+      /*
+       *防抖
+       **/
+      debounce(func, delay) {
+        console.log('454545');
+        var timer = null;
+        return function(...args) {
+          if (timer) {
+            clearTimeout(timer)
+          }
+          timer = setTimeout(() => {
+            func();
+            console.log(fun);
+          }, delay)
+        }
       },
       /*网络请求*/
       /*
@@ -153,35 +202,27 @@
           console.log(err);
         })
       }
-    },
-    mounted() {
-      this.$nextTick(this.ListtenScroll)
     }
   }
 </script>
 
 <style scoped>
   #home {
-    padding-top: 44px;
+
     position: relative;
     height: 100vh;
   }
 
   .home-nav {
+    position: relative;
     background-color: var(--color-tint);
-    color: #FFFFFF;
-    position: fixed;
-    left: 0;
-    top: 0;
-    right: 0;
+
     z-index: 9;
   }
 
   .tab_control {
-    /* position: sticky; */
-    top: 44px;
-    background-color: #FFFFFF;
     z-index: 9;
+    background-color: #FFFFFF;
   }
 
   .warpper {
@@ -190,5 +231,11 @@
     bottom: 49px;
     left: 0;
     right: 0;
+  }
+
+  .Imbibition {
+    position: relative;
+    z-index: 9;
+    background-color: #FFFFFF;
   }
 </style>

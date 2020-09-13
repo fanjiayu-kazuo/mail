@@ -50,14 +50,14 @@
           }
         })
         this.scroll.on('pullingUp', () => {
-          if (this.handler != null) {
+          if (this.handler) {
             clearTimeout(this.handler);
           }
           this.handler = setTimeout(() => {
             this.$emit('pullingUp');
             this.scroll.refresh();
             this.handler = null
-          }, 1000);
+          }, 300);
         })
       })
 
