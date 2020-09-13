@@ -6,6 +6,7 @@
       <detail-base-info :goods="goods" />
       <detail-shop-info :shop="shop" />
       <detail-goods-info :detailInfo='detailInfo' />
+      <detail-param-info :paramInfo='paramInfo'/>
     </scroll>
   </div>
 </template>
@@ -16,6 +17,7 @@
   import DetailBaseInfo from './detailChildren/detailBaseInfo.vue'
   import DetailShopInfo from './detailChildren/detailShopInfo.vue'
   import DetailGoodsInfo from './detailChildren/detailGoodsInfo.vue'
+  import DetailParamInfo from './detailChildren/detailParamInfo.vue'
   /*
   引入better scroll
   */
@@ -23,7 +25,8 @@
   import {
     getDetail,
     Goods,
-    ShopInfo
+    ShopInfo,
+    GoodsParam
   } from '../../network/detail.js'
   export default {
     name: "detail",
@@ -33,7 +36,8 @@
         topImgs: [],
         goods: {},
         shop: {},
-        detailInfo: {}
+        detailInfo: {},
+        paramInfo: {}
       }
     },
     components: {
@@ -42,6 +46,7 @@
       DetailBaseInfo,
       DetailShopInfo,
       DetailGoodsInfo,
+      DetailParamInfo,
       Scroll
     },
     created() {
@@ -55,6 +60,9 @@
         //店铺信息
         this.shop = new ShopInfo(data.shopInfo);
         this.detailInfo = data.detailInfo;
+        //参数信息
+        this.paramInfo= new GoodsParam(data.itemParams.info,data.itemParams.rule);
+        console.log(this.paramInfo);
       })
 
     },
@@ -74,7 +82,8 @@
   .detail {
     position: relative;
     height: 100vh;
-    z-index: 9;
+    z-index: 10;
+    background-color: #FFFFFF;
     /* margin-bottom: 55px; */
   }
 
