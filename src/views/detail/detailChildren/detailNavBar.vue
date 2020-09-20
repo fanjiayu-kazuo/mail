@@ -36,7 +36,7 @@
   }
 </script>
 
-<style>
+<style scoped>
   .title {
     display: flex;
   }

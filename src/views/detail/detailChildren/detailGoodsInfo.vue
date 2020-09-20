@@ -5,9 +5,11 @@
       <div class="desc">{{detailInfo.desc}}</div>
       <div class="end"></div>
     </div>
-    <div class="info-key">{{detailInfo.detailImage[0].key}}</div>
-    <div class="info-list">
-      <img v-for="(item, index) in detailInfo.detailImage[0].list" :src="item" alt="" @load="imgListUpload">
+    <div v-for="(item,index) in detailInfo.detailImage" :key='index'>
+      <div class="info-key">{{item.key}}</div>
+      <div class="info-list">
+        <img v-for="(item, index) in item.list" :src="item" alt="" @load="imgListUpload" :key='index'>
+      </div>
     </div>
   </div>
 </template>
@@ -25,7 +27,7 @@
     data() {
       return {
         count: 0,
-        detailInfoLength:0
+        detailInfoLength: 0
       }
     },
     methods: {
@@ -36,15 +38,15 @@
         }
       }
     },
-    watch:{
-      detailInfo(){
+    watch: {
+      detailInfo() {
         this.detailInfoLength = this.detailInfo.detailImage[0].list.length
       }
     }
   }
 </script>
 
-<style>
+<style scoped>
   .goods-info {
     padding: 20px 0;
     border-bottom: 5px solid #f2f5f8;

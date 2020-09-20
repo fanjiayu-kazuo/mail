@@ -7,6 +7,7 @@
       <detail-shop-info :shop="shop" />
       <detail-goods-info :detailInfo='detailInfo' />
       <detail-param-info :paramInfo='paramInfo'/>
+      <detail-info :commentInfo="commentInfo"/>
     </scroll>
   </div>
 </template>
@@ -18,6 +19,7 @@
   import DetailShopInfo from './detailChildren/detailShopInfo.vue'
   import DetailGoodsInfo from './detailChildren/detailGoodsInfo.vue'
   import DetailParamInfo from './detailChildren/detailParamInfo.vue'
+  import DetailInfo from './detailChildren/detailInfo.vue'
   /*
   引入better scroll
   */
@@ -37,7 +39,8 @@
         goods: {},
         shop: {},
         detailInfo: {},
-        paramInfo: {}
+        paramInfo: {},
+        commentInfo:{}
       }
     },
     components: {
@@ -47,6 +50,7 @@
       DetailShopInfo,
       DetailGoodsInfo,
       DetailParamInfo,
+      DetailInfo,
       Scroll
     },
     created() {
@@ -59,10 +63,16 @@
         this.$bus.$emit('dataInfoUpdata');
         //店铺信息
         this.shop = new ShopInfo(data.shopInfo);
+
         this.detailInfo = data.detailInfo;
         //参数信息
         this.paramInfo= new GoodsParam(data.itemParams.info,data.itemParams.rule);
-        console.log(this.paramInfo);
+        if(data.rate.cRate!=0){
+          this.commentInfo = data.rate.list[0]
+        }
+        setTimeout(()=>{
+          this.$refs.detailScroll.scroll.refresh();
+        },1000);
       })
 
     },
@@ -84,7 +94,6 @@
     height: 100vh;
     z-index: 10;
     background-color: #FFFFFF;
-    /* margin-bottom: 55px; */
   }
 
   .detail-nav {
