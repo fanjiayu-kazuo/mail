@@ -56,7 +56,8 @@
         handler: null,
         tabOffsetTop: 0,
         showContrue: false,
-        save_y: 0
+        save_y: 0,
+        itemImgListener: null
       }
     },
     components: {
@@ -75,14 +76,21 @@
       this.getHomeGoods('pop');
       this.getHomeGoods('new');
       this.getHomeGoods('sell');
-      //this.ListenImgUpLoad();
+      this.itemImgListener = () => {
+        if (this.handler) {
+          clearTimeout(this.handler);
+        }
+        this.handler = setTimeout(() => {
+          this.$refs.scroll && this.$refs.scroll.scroll.refresh();
+        }, 200)
+      };
     },
     activated() {
       this.$refs.scroll.scroll && this.$refs.scroll.scroll.scrollTo(0, this.save_y, 0);
       this.$refs.scroll.scroll && this.$refs.scroll.scroll.refresh();
     },
     deactivated() {
-      //this.$refs.scroll
+      this.$bus.$off('imgUpLoad',this.itemImgListener);
     },
     mounted() {
       this.ListenImgUpLoad();
@@ -121,14 +129,7 @@
        * 监听商品的list加载并且设置防抖
        **/
       ListenImgUpLoad() {
-        this.$bus.$on('imgUpLoad', () => {
-          if (this.handler) {
-            clearTimeout(this.handler);
-          }
-          this.handler = setTimeout(() => {
-            this.$refs.scroll && this.$refs.scroll.scroll.refresh();
-          }, 200)
-        })
+        this.$bus.$on('imgUpLoad', this.itemImgListener);
       },
       SwiperImgLoad() {
         this.tabOffsetTop = this.$refs.tabCountrolfirst.$el.offsetTop;
@@ -146,7 +147,6 @@
        * */
       ScorllPosition(position) {
         this.showbackbotton = (-position.y) > 500;
-        // console.log(-position.y +'   '+ this.tabOffsetTop);
         this.showContrue = (-position.y) > this.tabOffsetTop;
         this.save_y = position.y
 

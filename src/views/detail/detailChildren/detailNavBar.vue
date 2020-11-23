@@ -28,6 +28,7 @@
     methods: {
       changeIndex(index) {
         this.currentIndex = index;
+        this.$emit('titleClick',index);
       },
       goHome(){
         this.$router.back();

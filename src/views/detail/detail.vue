@@ -1,14 +1,17 @@
 <template>
   <div class="detail">
-    <detail-nav-bar class="detail-nav" />
-    <scroll class="content" :pullUpLoad='true' ref='detailScroll' :probe-type="3">
+    <detail-nav-bar class="detail-nav" @titleClick='titleClick' ref="detailnav" />
+    <scroll  class="content" :pullUpLoad='true' ref='detailScroll' :probe-type="3" @ScorllPosition="ScorllPosition">
       <detail-swiper :topImage='topImgs' @detailImgLoad='detailImgLoad'></detail-swiper>
       <detail-base-info :goods="goods" />
       <detail-shop-info :shop="shop" />
       <detail-goods-info :detailInfo='detailInfo' />
-      <detail-param-info :paramInfo='paramInfo'/>
-      <detail-info :commentInfo="commentInfo"/>
+      <detail-param-info ref='param' :paramInfo='paramInfo' />
+      <detail-info ref='comment' :commentInfo="commentInfo" />
+      <goods-list ref='list' :goods='recommends' />
     </scroll>
+    <back-top @click.native='backClick' v-show="showbackbotton" />
+    <detail-bottom-bar @addToCart="addToCart"/>
   </div>
 </template>
 
@@ -20,6 +23,11 @@
   import DetailGoodsInfo from './detailChildren/detailGoodsInfo.vue'
   import DetailParamInfo from './detailChildren/detailParamInfo.vue'
   import DetailInfo from './detailChildren/detailInfo.vue'
+  import GoodsList from '../../components/content/goods/GoodsList.vue'
+  import detailBottomBar from './detailChildren/detailBottomBar.vue'
+  import {
+    backTopMixin
+  } from '../../common/mixin.js'
   /*
   引入better scroll
   */
@@ -28,6 +36,7 @@
     getDetail,
     Goods,
     ShopInfo,
+    getRecommend,
     GoodsParam
   } from '../../network/detail.js'
   export default {
@@ -40,7 +49,12 @@
         shop: {},
         detailInfo: {},
         paramInfo: {},
-        commentInfo:{}
+        commentInfo: {},
+        recommends: [],
+        scrollToYs: [],
+        handler: null,
+        itemImgListener: null,
+        currentIndex: 0
       }
     },
     components: {
@@ -51,7 +65,9 @@
       DetailGoodsInfo,
       DetailParamInfo,
       DetailInfo,
-      Scroll
+      GoodsList,
+      Scroll,
+      detailBottomBar
     },
     created() {
       this.itemid = this.$route.params.iid;
@@ -66,25 +82,71 @@
 
         this.detailInfo = data.detailInfo;
         //参数信息
-        this.paramInfo= new GoodsParam(data.itemParams.info,data.itemParams.rule);
-        if(data.rate.cRate!=0){
+        this.paramInfo = new GoodsParam(data.itemParams.info, data.itemParams.rule);
+        if (data.rate.cRate != 0) {
           this.commentInfo = data.rate.list[0]
         }
-        setTimeout(()=>{
-          this.$refs.detailScroll.scroll.refresh();
-        },1000);
+      })
+      getRecommend().then(res => {
+        this.recommends = res.data.list;
+        //console.log(this.recommends);
       })
 
+      this.itemImgListener = () => {
+        if (this.handler) {
+          clearTimeout(this.handler);
+        }
+        this.handler = setTimeout(() => {
+          this.$refs.detailScroll.scroll.refresh();
+          this.scrollToYs = [];
+          this.scrollToYs.push(0);
+          this.scrollToYs.push(this.$refs.param.$el.offsetTop);
+          this.scrollToYs.push(this.$refs.comment.$el.offsetTop);
+          this.scrollToYs.push(this.$refs.list.$el.offsetTop);
+          console.log(this.scrollToYs);
+        }, 200)
+      }
     },
-
+    mixins: [backTopMixin],
     methods: {
       detailImgLoad() {
         this.$refs.detailScroll.scroll.refresh();
       },
       imgListUpload() {
         this.$refs.detailScroll.scroll.refresh();
+      },
+      titleClick(index) {
+        console.log(index);
+        this.$refs.detailScroll.scroll.scrollTo(0, -this.scrollToYs[index], 300);
+      },
+      ScorllPosition(position) {
+        this.showbackbotton = (-position.y) > 500;
+        var saveY = -position.y;
+        for (let i = 0; i < this.scrollToYs.length; i++) {
+          if (this.currentIndex != i && (i < this.scrollToYs.length - 1)) {
+            if (saveY >= this.scrollToYs[i] && saveY < this.scrollToYs[i + 1]) {
+              this.currentIndex = i;
+              this.$refs.detailnav.currentIndex = this.currentIndex
+            }
+          } else {
+            if (this.currentIndex != i && saveY >= this.scrollToYs[i]) {
+              this.currentIndex = i;
+              this.$refs.detailnav.currentIndex = this.currentIndex
+            }
+          }
+        }
+      },
+      addToCart(){
+        console.log("aaa");
       }
-    }
+    },
+    mounted() {
+      this.$bus.$on('imgUpLoad', this.itemImgListener);
+
+    },
+    destroyed() {
+      this.$bus.$off('imgUpLoad', this.itemImgListener);
+    },
   }
 </script>
 
@@ -103,7 +165,7 @@
   }
 
   .content {
-    height: calc(100% - 44px);
+    height: calc(100% - 44px - 49px);
     margin-bottom: 49px;
   }
 </style>
