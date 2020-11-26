@@ -137,7 +137,14 @@
         }
       },
       addToCart(){
-        console.log("aaa");
+        const product = {}
+        product.image = this.topImgs[0];
+        product.title = this.goods.title;
+        product.desc = this.goods.desc;
+        product.price = this.goods.nowPrice;
+        product.iid = this.itemid;
+        this.$store.dispatch('addCart',product);
+        console.log(this.$store.state.carList);
       }
     },
     mounted() {
